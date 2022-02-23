@@ -1,0 +1,114 @@
+---
+title: "Data Manipulation in R"
+date: "19/08/2021"
+output: html_document
+---
+#### Name : Sara Kulkarni
+#### Reg. no : 19BCE1567
+
+Obtain a data frame called “newsurvey” by removing all ‘na’ values in “survey” data of MASS package to do the following:
+
+```{r}
+library(MASS)
+data(survey)
+any(is.na(survey))
+```
+
+
+```{r}
+sum(is.na(survey))
+```
+
+
+```{r}
+newsurvey <- na.omit(survey)
+nrow(newsurvey)
+```
+
+1. Install the dplyr package and import it.
+
+```{r}
+library(dplyr)
+```
+
+2. Filter the bottom 5 male left handers.
+
+```{r}
+newsurvey %>%
+  filter(W.Hnd=="Left") %>%
+  tail(5)
+```
+
+3. Display all male right handers who keep left on top while clapping.
+
+```{r}
+newsurvey %>%
+  filter(Sex=="Male",W.Hnd=="Right",Clap=="Left")
+```
+
+4. Display random 3 students under each category of exercise.
+
+```{r}
+newsurvey %>%
+  group_by(Exer) %>%
+  slice_sample(n=3)
+```
+
+5. Display random 6 rows of gender, age and writing hand columns of the students.
+
+```{r}
+newsurvey %>%
+  dplyr::select(Sex,Age,W.Hnd) %>%
+  slice_sample(n=6)
+```
+
+6. Display random 50% of the rows of age, pulse rate and writing hand span of male right handers.
+```{r}
+newsurvey %>%
+  filter(Sex=="Male",W.Hnd=="Right") %>%
+  dplyr::select(Age,Pulse,W.Hnd) %>%
+  sample_frac(0.5)
+```
+
+7. Arrange all female right handers according to descending order of their heights.
+
+```{r}
+newsurvey %>%
+  filter(Sex=="Female",W.Hnd=="Right") %>%
+  arrange(desc(Height))
+```
+
+8. Introduce a new column hand_span which contains the value as sum of span of writing hand and non-writing hand and display it along with gender, writing hand and non-writing hand span.
+```{r}
+newsurvey %>%
+  mutate(hand_span=Wr.Hnd+NW.Hnd) %>%
+  dplyr::select(Sex,Wr.Hnd,NW.Hnd,hand_span)
+```
+
+9. Display the median writing span of male and female left handers.
+
+```{r}
+newsurvey %>%
+  filter(W.Hnd=="Left") %>%
+  group_by(Sex) %>%
+summarize(median=median(Wr.Hnd))
+```
+
+10. Find the minimum pulse rate of male left and right handers.
+
+```{r}
+m=filter(newsurvey, Sex=="Male", W.Hnd == "Left")
+m1=filter(newsurvey, Sex=="Male", W.Hnd == "Right")
+min(m[,"Pulse"])
+```
+
+```{r}
+min(m1[,"Pulse"])
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
