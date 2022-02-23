@@ -1,0 +1,108 @@
+---
+title: "Data Frames in R"
+date: "12/08/2021"
+output: html_document
+---
+#### Name : Sara Kulkarni
+#### Reg. no : 19BCE1567
+
+Creating a data frame
+
+1. Create a data frame by considering 5 students and 4 courses (C1,C2, C3, C4). Each score has a maximum score of 30. If a student is absent for CAT1 of a course, the mark entry is 0 for that course. (Have 0 entry also in the data)
+```{r}
+Names = c("Stud1","Stud2","Stud3","Stud4","Stud5")
+c1 = c(21,18,22,27,18)
+c2 = c(26,15,23,13,12)
+c3 = c(18,22,0,0,21)
+c4 = c(20,13,12,0,17)
+
+my_df <- data.frame(Names,c1,c2,c3,c4)
+```
+
+2. View the contents of the data frame.
+```{r}
+View(my_df)
+my_df
+
+```
+
+3. Find the total marks of each student.
+4. Append a column to include the total marks of the students and view the data frame.
+```{r}
+my_df$total <- rowSums(my_df[c(2,3,4,5)])
+View(my_df)
+my_df
+```
+
+5. Find the maximum total marks and display the name of the participant who scored it
+
+```{r}
+which.max(my_df$total)
+```
+
+```{r}
+my_df$Names[which.max(my_df$total)]
+```
+
+6. Compute the average mark in each course and append it as a new row in the data frame.
+
+```{r}
+my_df <- rbind(my_df,data.frame(Names = "Average",c1=mean(my_df$c1),c2=mean(my_df$c2),c3=mean(my_df$c3),c4=mean(my_df$c4),total=mean(my_df$total)))
+my_df
+```
+
+7. Store the details in a comma separated values (csv) file. Also suppress the row numbers.
+
+```{r}
+write.csv(my_df,"marks.csv",row.names = FALSE)
+```
+
+Indexing and Slicing data frames
+
+8. Read the content of recently stored csv file in a data frame and view it.
+
+```{r}
+studentmarks <- read.csv("marks.csv")
+studentmarks
+```
+
+
+
+9. Access the marks of students in C2 using the column name.
+```{r}
+studentmarks$c2
+```
+
+10. Use index number to retrieve the same data.
+```{r}
+studentmarks[3]
+```
+
+11. Extract the marks of third student in C3.
+```{r}
+studentmarks[3,4]
+```
+
+12. Display the names and total marks of all students.
+```{r}
+studentmarks[c(1,2,3,4,5),c(1,6)]
+```
+
+13. Display the names of the students who were absent for the course C3 during CAT1.
+```{r}
+absent <- studentmarks["c3"]==0
+row.names(studentmarks)[absent]
+```
+
+14. Obtain the names whose total marks is below its average.
+```{r}
+lessthan <- studentmarks["total"]<studentmarks["Average",6]
+row.names(studentmarks)[lessthan]
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
