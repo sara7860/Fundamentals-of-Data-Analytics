@@ -1,0 +1,107 @@
+---
+title: "19BCE1567_LAB10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+***
+### Name: SARA KULKARNI
+### Reg no.: 19BCE1567
+### Date: 11/11/2021
+
+***
+#### Dataset used: https://www.kaggle.com/kaggle/us-consumer-finance-complaints
+
+***
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+getwd()
+rm(list=ls())
+complain <- read.csv("consumer_complaints.csv")
+```
+
+Checking the missing values:
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+any(is.na(complain))
+str(complain)
+```
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+names(complain)
+
+table(complain$product)
+```
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+student_loan <- subset(complain, product == "Student loan")
+```
+
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+table(student_loan$sub_product)
+```
+
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+library(dplyr)
+student_loan %>% 
+  select(date_received, product, company, issue, sub_issue, company_response_to_consumer) %>%
+  View()
+```
+
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+student_loan %>% 
+  group_by(company) %>% 
+  dplyr::summarize(n_complaints = n()) %>%
+  mutate(percent=round((n_complaints/sum(n_complaints)*100))) %>%
+  arrange(desc(n_complaints))
+```
+Complaints related to the following issues:
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+library(ggplot2)
+
+ggplot(student_loan, aes(x=issue, fill=issue)) +
+  geom_bar() +
+  coord_flip() +
+  ggtitle("Student Loans - Complaint Issue") + 
+  xlab("") + 
+  ylab("N")
+```
+
+### other visulaizations
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+table(complaint$state)
+table(student_loan$state)
+
+
+bool <- student_loan["state"]==""
+bool
+student_loan <- student_loan[!bool,]
+
+
+student_loan %>% 
+  group_by(state) %>% 
+  dplyr::summarize(n_complaints = n()) %>%
+  mutate(percent=round((n_complaints/sum(n_complaints)*100))) %>%
+  arrange(desc(n_complaints))
+
+statefreq <- table(student_loan$state)
+pie(statefreq,radius=1)
+
+for (i in names(student_loan[,c("timely_response", "company_response_to_consumer", "submitted_via")])){
+  print(qplot(student_loan[[i]]) + coord_flip())
+}
+
+
+```
