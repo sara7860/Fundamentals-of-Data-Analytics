@@ -1,0 +1,157 @@
+---
+title: "Data Cleaning in R"
+date: "26/08/2021"
+output: html_document
+---
+#### Name : Sara Kulkarni
+#### Reg. no : 19BCE1567
+
+Choose any data set of your choice and do the data cleaning and preparation. Use .Rmd file for the task and knit and submit it in html format
+
+Data Set used:-Temperature Readings : IOT Devices https://www.kaggle.com/atulanandjha/temperature-readings-iot-devices/version/1
+
+```{r}
+#clear workspace
+rm(list=ls())
+
+#install.packages("tidyverse")
+library(tidyverse)
+```
+
+```{r}
+temp <- read.csv("IOT-temp.csv")
+#dimension of the data
+dim(temp)
+```
+
+```{r}
+temp <- temp %>% 
+slice_sample(n=5000)
+#structure of the data
+str(temp)
+```
+
+```{r}
+#install.packages("missForest")
+library(missForest)
+```
+
+```{r}
+temp <- prodNA(temp, noNA = 0.01)
+any(is.na(temp))
+```
+
+```{r}
+sum(is.na(temp))
+```
+
+Cleaning ID Column
+
+```{r}
+sum(is.na(temp$id))
+```
+
+```{r}
+temp %>%
+  filter(is.na(id))
+```
+
+```{r}
+temp <- temp %>%
+  drop_na(id)
+
+sum(is.na(id))
+```
+
+Cleaning room_id.id column
+
+```{r}
+sum(is.na(temp$room_id.id))
+```
+
+```{r}
+unique(temp$room_id.id)
+
+temp$room_id.id <- ifelse(is.na(temp$room_id.id), 'Room Admin', temp$room_id.id)
+sum(is.na(temp$room_id.id))
+```
+
+Cleaning noted_date column
+
+```{r}
+sum(is.na(temp$noted_date))
+```
+
+```{r}
+unique(temp$noted_date)
+```
+
+
+```{r}
+temp %>%
+  filter(is.na(noted_date))
+```
+
+```{r}
+temp <- temp %>%
+  drop_na(noted_date)
+temp$noted_date<-as.POSIXlt(temp$noted_date,format="%d-%m-%Y %H:%M")
+str(temp)
+```
+
+```{r}
+sum(is.na(temp$noted_date))
+```
+
+Cleaning temp column
+
+```{r} 
+sum(is.na(temp$temp))
+```
+
+```{r}
+unique(temp$temp)
+```
+```{r}
+temp %>%
+  summarize(avg=mean(temp,na.rm=TRUE),med=median(temp,na.rm=TRUE))
+```  
+
+
+```{r}
+temp <- temp %>%
+  mutate(temp=replace(temp,is.na(temp),median(temp,na.rm=TRUE)))
+sum(is.na(temp$temp))  
+```
+
+Cleaning Out.In
+
+```{r}
+sum(is.na(temp$out.in))
+```
+
+```{r}
+unique(temp$out.in)
+```
+
+```{r}
+my_mode <- function(x) {                                     
+  unique_x <- unique(x)
+  mode <- unique_x[which.max(tabulate(match(x, unique_x)))]
+  mode
+}
+temp$out.in[is.na(temp$out.in)] <- my_mode(temp$out.in[!is.na(temp$out.in)])                 
+
+sum(is.na(temp$out.in))
+```
+
+Cleaned dataset
+
+```{r}
+sum(is.na(temp))
+```
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
