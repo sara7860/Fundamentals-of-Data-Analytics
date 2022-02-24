@@ -1,0 +1,137 @@
+---
+title: "Visualization using base graphics in R"
+date: "09/09/2021"
+output: html_document
+---
+#### Name : Sara Kulkarni
+#### Reg. no : 19BCE1567
+
+Use the newsurvey data obtained by cleaning ‘na’ values in survey data of MASS package to do the following:
+
+```{r}
+rm(list=ls())
+library(MASS)
+df <- data.frame(survey)
+head(df)
+```
+
+```{r}
+any(is.na(df))
+```
+
+```{r}
+sum(is.na(df))
+```
+
+```{r}
+newsurvey <- na.omit(df)
+sum(is.na(newsurvey))
+View(df)
+```
+
+1. Plot a bar graph for the number of male and female participants in the survey. Provide the title as “Male and Female participants”, y-axis label as “frequency” and specify the colours for the bars.
+
+```{r}
+sex <- table(newsurvey$Sex)
+barplot(sex,main = 'Male and Female participants',ylab='frequency',col=c("black","brown"))
+```
+
+
+2. Plot a bar graph for the number of left handers and right handers in the survey. Provide the title as “Left Handers and Right Handers”, y-axis label as “count” and specify the colours for the bars.
+
+```{r}
+handers <- table(newsurvey$W.Hnd)
+barplot(handers,main = 'Left Handers and Right Handers',ylab='count',col=c("pink","blue"))
+
+```
+
+3. Plot the distribution between male left handers and female left handers using bar chart. Provide the title as “Female Left Handers and Male Left Handers , y-axis label as “count” and specify the colours for the bars.
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+ns <- newsurvey %>%
+   filter(W.Hnd=="Left")%>%
+   dplyr::select(Sex)
+lefthanders <- table(ns$Sex)
+barplot(lefthanders,main = 'Female Left Handers and Male Left Handers',ylab='count',col=c("red","black"))
+```
+
+4. Draw the distribution of smoking habits of male left handers using pie chart.
+
+```{r}
+ns1 <- newsurvey %>%
+   filter(W.Hnd=="Left")%>%
+  filter(Sex=="Male")%>%
+   dplyr::select(Smoke)
+smoke <- table(ns1$Smoke)
+pie(smoke,radius=1)
+```
+
+5. Draw the histogram of age distribution with the title as ‘Age distribution’ and xlabel as ‘Age range’ and ylabel as ‘frequency’.
+
+```{r}
+hist(newsurvey$Age,main='Age Distribution',xlab='Age Range',ylab='frequency')
+```
+
+6. Reveal the relationship between the age and writing hand span using scatter plot.
+
+```{r}
+library(lattice)
+xyplot(newsurvey$Age~df$Wr.Hnd,main="scatter plot: Age and Writing Hand Span",xlab = "Writing Hand Span",ylab = "Age")
+```
+
+7. Draw the boxplot for pulse rate to analyse the five summary statistics. Provide appropriate title and label.
+
+```{r}
+boxplot(newsurvey$Pulse)
+```
+
+#From the plot, it is clear that there are outlier\rs which indicate that the mean and median are quite far from each other, And the maximum possible value(which is not outlier) is around 98 and the minimum value is around 52 approximately. The median lies around the vlaue of 72. The upper quartile and lower quartile are around 80 and 65 respectively.
+
+1. Draw the histogram plot for height of Female participants.
+
+```{r}
+df <- filter(newsurvey,Sex=="Female")
+hist(df$Height)
+```
+
+#Mostly the height of the participants belong to 150-180
+
+2. Draw the bar plot for female and male participants who exercise frequently
+
+```{r}
+unique(df$Exer)
+```
+
+
+```{r}
+df <- filter(newsurvey,Exer=="Freq")
+genexer <- table(df$Sex)
+barplot(genexer,col=c("red","blue"),main="Female and Male distribution for freq exercising")
+```
+
+#The number of male participants who exercise frequenrly is more than that of female
+
+3. Draw the bar plot for the smoking habits of Male participants who exercise frequently.
+
+```{r}
+unique(newsurvey$Smoke)
+```
+
+```{r} 
+df <- filter(newsurvey, Sex=="Male",Exer=="Freq")
+Smokee <- table(df$Smoke)
+barplot(Smokee)
+```
+
+#A large number of male participants who exercise freqently never smoke
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
