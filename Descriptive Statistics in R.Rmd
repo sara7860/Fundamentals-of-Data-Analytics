@@ -1,0 +1,192 @@
+---
+title: "Descriptive Statistics in R"
+date: "30/09/2021"
+output: html_document
+---
+#### Name : Sara Kulkarni
+#### Reg. no : 19BCE1567
+
+Create a data frame ‘newsurvey’ that contains the survey data in MASS package after removing the NA values. Use it for answering following queries:
+
+```{r}
+rm(list=ls())
+#MASS Library
+library(MASS)
+#Loading the dplyr package
+library(dplyr)
+```
+
+```{r}
+#cleaning data
+data(survey)
+newsurvey <- na.omit(survey)
+View(newsurvey)
+str(newsurvey)
+
+View(sur)
+```
+
+1. How many left and right handers are there?
+
+```{r}
+newsurvey %>% group_by(W.Hnd)%>%
+  summarize(count=n())
+```
+
+2. Find the relative frequency distribution of left and right handers and display them with the precision of two decimal places.
+
+```{r}
+options(digits=2)
+whand_frequency=table(survey$W.Hnd)
+size=nrow(survey)
+whand_rel_frequency=whand_frequency/size
+whand_rel_frequency
+```
+
+3. Display the male left hander and female left hander in the column format.
+
+```{r}
+newsurvey%>%
+  filter(W.Hnd =='Left')%>%
+group_by(Sex)%>%
+summarize(count=n())
+```
+
+4. What percentage of male right handers never smokes?
+
+```{r}
+male_left_handers <- newsurvey %>%
+  filter(W.Hnd =='Right' & Sex == 'Male',Smoke =='Never')
+
+sizeA = nrow(male_left_handers)
+sizeB =nrow(newsurvey)
+
+(sizeA/sizeB)*100
+
+```
+
+5. Find the range of students’ height participated in the survey.
+
+
+```{r}
+range(newsurvey$Height)
+```
+
+```{r}
+max <- max(newsurvey$Height)
+min <- min(newsurvey$Height)
+Height_range <- max - min
+Height_range
+```
+
+
+6. Break the height range into non-overlapping sub-intervals by defining a sequence of equal distance break points of 10 by rounding the range to nearest integer.
+
+```{r}
+break_Height = seq(150, 210, by=10)
+break_Height
+```
+
+7. Find the distribution of the height range according to the sub-intervals with cut with its right boundary opened. Display it in column form.
+
+```{r}
+Height_range = cut(newsurvey$Height, break_Height, right=FALSE)
+
+Height_range_frequency = table(Height_range)
+cbind(Height_range_frequency)
+```
+
+8. Which height range of students has mostly participated in the survey?
+
+```{r}
+max(Height_range_frequency)
+which.max(Height_range_frequency)
+```
+
+9. Compute the mean, variance and standard deviation of the height of the students participated in the survey.
+
+```{r}
+mean <- mean(newsurvey$Height)
+mean
+
+variance <- var(newsurvey$Height)
+variance
+
+sd <- sd(newsurvey$Height)
+sd
+```
+
+10. Which category of clap students has the maximum writing hand span?
+
+```{r}
+sum_span <- newsurvey %>%
+  group_by(Clap)%>%
+  summarise(sum_writing_span=sum(Wr.Hnd))%>%
+  arrange(desc(sum_writing_span))
+sum_span
+```
+
+```{r}
+head(sum_span, 1)['Clap']
+```
+
+11. Compute the covariance and correlation between height and writing span.
+
+```{r}
+cov(newsurvey$Height, newsurvey$Wr.Hnd)
+```
+
+```{r}
+cor(newsurvey$Height, newsurvey$Wr.Hnd)
+```
+
+12. Display the 30%, 60% and 80% percentile of the height data.
+```{r}
+percentile_height=quantile(newsurvey$Height, c(.30,.60,.80))
+percentile_height
+```
+
+Frame any three questions on descriptive statistics to analyse the categorical & quantitative variables present in the data of your choice.
+
+1. Find the range of age, break the range into sub intervals by defining a sequence of equal distance break points of 10, display the distribution of age according to the sub-intervals.
+
+```{r}
+str(newsurvey)
+age=newsurvey$Age
+range(age)
+```
+
+```{r}
+break2=seq(15,75,by=10)
+break2
+```
+
+```{r}
+age_cut=cut(age,break2)
+table(age_cut)
+```
+
+2. Find the gender category which has maximum participants who never smoke.
+
+```{r}
+newsurvey%>%
+  group_by(Sex)%>%
+  filter(Smoke=="Never")%>%
+  summarize(count=n())%>%
+  arrange(desc(count))%>%
+  head(1)
+```
+
+3. Find the percentage of participants who exercise frequently and never smoke.
+
+```{r}
+perc <- newsurvey%>%
+  filter(Exer=="Freq",Smoke=="Never")
+nrow(perc)/nrow(newsurvey)*100
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
