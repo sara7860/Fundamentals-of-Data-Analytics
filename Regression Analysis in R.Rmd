@@ -1,0 +1,277 @@
+---
+title: "Regression Analysis in R"
+date: "07/10/2021"
+output: html_document
+---
+#### Name : Sara Kulkarni
+#### Reg. no : 19BCE1567
+
+
+```{r}
+library(tidyverse)
+library(caret)
+library(MASS)
+```
+
+Reading the Dataset
+
+```{r}
+setwd('C:/Users/Pooja/Downloads')
+Price <- read.csv("CarPrice.csv")
+View(Price)
+Price <- na.omit(Price)
+```
+
+Removing Categorical and unwanted Data
+
+```{r}
+Price$car_ID <- NULL
+Price$symboling <- NULL
+Price$CarName <- NULL
+Price$fueltype <- NULL
+Price$aspiration <- NULL
+Price$doornumber <- NULL
+Price$carbody <- NULL
+Price$drivewheel <- NULL
+Price$enginelocation <- NULL
+Price$enginetype <- NULL
+Price$cylindernumber <- NULL
+Price$fuelsystem <- NULL  
+
+```
+
+Car_Price Dataset
+
+```{r}
+head(Price)
+str(Price)
+```
+
+Finding Correlation between Various Columns
+
+```{r}
+cor(Price$wheelbase, Price$price)
+
+cor(Price$carlength, Price$price)
+
+cor(Price$carwidth, Price$price)
+
+cor(Price$carheight, Price$price)
+
+cor(Price$curbweight, Price$price)
+
+cor(Price$enginesize, Price$price)
+
+cor(Price$boreratio, Price$price)
+
+cor(Price$stroke, Price$price)
+
+cor(Price$compressionratio, Price$price)
+
+cor(Price$peakrpm, Price$price)
+
+cor(Price$citympg, Price$price)
+
+cor(Price$highwaympg, Price$price)
+
+cor(Price$citympg, Price$price)
+```
+Inferences
+
+-> Column ‘enginesize’ and ‘price’ have a correlation of 0.8741448
+
+-> After finding the correation for all the attributes we found out that ‘enginesize’ and ‘price’ columns are linearly dependent.
+
+
+Model 1: Based on enginesize
+
+Visualization
+
+
+```{r}
+library(ggplot2)
+par(mar=c(2,2,2,2))
+ggplot(Price, aes(x=enginesize, y=price), colour="green")+geom_point()+geom_smooth()
+
+```
+
+```{r}
+ggplot(Price, aes(x=enginesize, y=price))+geom_point()+geom_smooth(method='lm',se=FALSE)
+
+```
+
+-> We can proceed with linear regression because the regression line create by geom_smooth() is close to a straight line.
+
+Building a Linear Model
+
+```{r}
+Lmodel <- lm(price~enginesize, data=Price)
+Lmodel
+```
+
+Inference
+
+-> Since the correlation is high we create a linear regression model dependent on enginesize, the line predicted is: price = 167.7*enginesize - 8005.4
+
+Model Summary
+
+```{r}
+summary(Lmodel)
+```
+
+Inference
+
+-> Since p Value is less than significance level (< 0.05), we can reject the null hypothesis. The linear model is statistically significant.
+
+Residual Standard Error
+
+```{r}
+sigma(Lmodel)
+sigma(Lmodel)*100/mean(Price$price)
+```
+
+Inference
+
+-> The residual standard error rate is 29%. The lesser the RSE, the better is the model for prediction.
+
+Confidence Interval on the Model Parameters
+
+```{r}
+confint(Lmodel)
+```
+
+Confidence Interval on the Expected Outcome
+
+```{r}
+head(Price)
+```
+
+```{r}
+enginesize=150
+new_dt <- data.frame(enginesize)
+conf_int_pt <- predict(Lmodel, new_dt, level = .95, interval = "confidence")
+conf_int_pt
+```
+
+Inference
+
+-> (16536.5, 17762.13) is the range in which the model predicts the price value in ‘confidence’ interval when enginesize=150
+
+Prediction interval on a particular outcome
+```{r}
+pred_interval_pt <- predict(Lmodel,new_dt,level = .95,interval = "prediction")
+pred_interval_pt
+```
+
+Inference
+
+-> (9455.962 , 24842.67) is the range in which the model predicts the price value in ‘prediction’ interval when enginesize=150
+
+Model 2: Multi-columns
+Split the data into training and test data set.
+
+```{r}
+set.seed(123)
+train_samples <- Price$price %>%
+  createDataPartition(p=0.8, list=FALSE)
+
+head(train_samples)
+```
+
+```{r}
+train <- Price[train_samples,]
+test <- Price[-train_samples,]
+
+```
+
+Building a regression model
+
+```{r}
+Rmodel <- lm(price~.,data=train)
+summary(Rmodel)
+```
+Inference -> There are only 4 significant columns as the other columns exceed significance level (> 0.05).
+
+Selecting Significant Columns
+
+```{r}
+Price <- Price %>%
+dplyr::select(enginesize, stroke, compressionratio, peakrpm, price)
+str(Price)
+```
+
+Split the data into training and test data set
+
+```{r}
+set.seed(123)
+train_samples <-
+  caret::createDataPartition(Price$price, p=0.8, list=FALSE)
+str(Price)
+```
+
+```{r}
+head(train_samples)
+```
+
+
+```{r}
+train <- Price[train_samples,]
+test <- Price[-train_samples,]
+```
+
+Building a Regression Model
+```{r}
+Rmodel <- lm(price~.,data=train)
+summary(Rmodel)
+
+```
+
+Inference
+
+R2 corresponds to the squared correlation between the observed outcome values and the predicted values. The R2 value has also improved in Model 2
+
+-> R2 of precious model: 0.76
+
+-> Adjusted R2 of current model: 0.812
+
+Residual Standard Error
+```{r}
+sigma(Rmodel)
+
+sigma(Rmodel)*100/mean(Price$price)
+```
+
+Inference
+
+-> By taking into consideration more significant columns(stroke, compressionratio, peakrpm), the error rates have reduced in comparison to linear regression model only based on enginesize.
+
+-> RSE of current model: 26.34362
+-> RSE of previous model: 29.29531
+
+
+Making Predictions
+```{r}
+prediction <- Rmodel %>%
+  predict(test)
+```
+
+Model Performance
+
+```{r}
+RMSE <- RMSE(prediction,test$price)
+RMSE
+```
+
+```{r}
+R2 <- R2(prediction,test$price)
+R2
+
+```
+
+Inference -> R2 value 0.8309894 (closer to 1) shows that the model predicts price values accurately.
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
