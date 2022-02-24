@@ -1,0 +1,103 @@
+---
+title: "Visualization of data using Grammar of Graphics in R"
+date: "23/09/2021"
+output: html_document
+---
+#### Name : Sara Kulkarni
+#### Reg. no : 19BCE1567
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+```
+
+```{r}
+sur <- na.omit(MASS::survey)
+View(sur)
+```
+1.
+
+```{r}
+sex_factor=factor(sur$Sex,levels = c("Male","Female"),labels = c("Male","Female"))
+ggplot2::ggplot(data=sur,aes(x=sex_factor,fill=sex_factor))+geom_bar(fill=c("red","blue"))+ggtitle("Male and Female Participants")
+```
+
+2. 
+
+```{r}
+hand_factor=factor(sur$W.Hnd,levels=c("Right","Left"),labels=c("Right Hander","Left Hander"))
+ggplot(data=sur,aes(x=hand_factor,fill=hand_factor))+geom_bar(fill=c("blue","green"))+ggtitle("Left Handers and Right Handers")
+```
+
+3.
+
+```{r}
+new_sur <- filter(sur, W.Hnd == "Right")
+gender_factor <- factor(new_sur$Sex)
+ggplot(new_sur,aes(x=gender_factor, fill=gender_factor)) + geom_bar() + ggtitle("Female  Right Handers and Male Right Handers")
+```
+
+4.
+
+```{r}
+new_sur <- filter(sur, W.Hnd == "Left" & Sex == "Female")
+a <- factor(new_sur$Age)
+ggplot(new_sur, aes(x="",y=a,fill=a))+geom_bar(width = 1,stat='identity')+coord_polar("y",start = 0)
+
+```
+
+5.
+
+```{r}
+ggplot(sur,aes(x=Age))+geom_histogram()+labs(title = "Age Distribution",x='Age Range',y='frequency')
+```
+
+6.
+
+```{r}
+ggplot(sur,aes(x=Age,y=Wr.Hnd))+geom_point()
+```
+
+7. 
+
+```{r}
+new_sur <- sur %>% 
+  filter(W.Hnd=="Right")
+ggplot(new_sur,aes(x=Wr.Hnd,y=Pulse,size=Height))+geom_point(aes(color=Sex))
+```
+
+8.
+
+```{r}
+ggplot(sur,aes(x=Height,fill=Sex))+geom_histogram()+labs(title = "Distribution of height of Students",y='frequency')+facet_wrap(sur$W.Hnd,ncol=1)
+```
+
+9. 
+
+```{r}
+ex_factor <- factor(sur$Exer)
+hnd_factor <- factor(sur$W.Hnd)
+ggplot(sur, aes(x = Wr.Hnd, y = NW.Hnd, group = hnd_factor, color = hnd_factor)) + geom_line() + facet_wrap(ex_factor, ncol = 1)
+```
+
+10.
+
+```{r}
+clap_factor <- factor(sur$Clap)
+gender_factor <- factor(sur$Sex)
+ggplot(sur, aes(x = Age, fill = clap_factor)) + geom_histogram() + facet_wrap(gender_factor, ncol = 1)
+```
+
+11. 
+
+```{r}
+ggplot(sur, aes(x=Wr.Hnd,y=Exer))+geom_boxplot()
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
