@@ -1,0 +1,120 @@
+---
+title: "Healthcare Analytics in R"
+date: "21/10/2021"
+output: html_document
+---
+#### Name : Sara Kulkarni
+#### Reg. no : 19BCE1567
+
+
+```{r}
+rm(list=ls())
+library(ggplot2)
+library(dplyr)
+library(caret)
+```
+
+
+```{r}
+library(lattice)
+heal <- read.csv("insurance.csv",stringsAsFactors = TRUE)
+heal1 <- sample_n(heal,500)
+head(heal1)
+tail(heal1)
+str(heal1)
+summary(heal1)
+```
+
+
+```{r}
+any(is.na(heal1)) 
+sum(is.na(heal1))
+summary(heal1$charges)
+```
+
+
+```{r}
+hist(heal1$charges)
+```
+
+
+```{r}
+table(heal1$region)
+```
+
+
+
+```{r}
+cor(heal1$charges, heal1$age)
+cor(heal1$charges, heal1$bmi)
+cor(heal1$charges, heal1$children)
+
+cor(heal1[c("age", "bmi", "children", "charges")])
+
+```
+
+```{r}
+splom(heal1[c("age", "bmi", "children", "charges")])
+```
+
+
+
+```{r}
+set.seed(123)
+train_samples <-heal1$charges %>%
+  createDataPartition(p=0.8,list=FALSE)
+head(train_samples)
+```
+
+
+```{r}
+train <- heal1[train_samples,]
+test <- heal1[-train_samples,]
+
+initial_model <- lm(charges~ ., data = train)
+summary(initial_model)
+```
+
+
+```{r}
+heal1$age2 <- heal1$age^2
+
+summary(heal1$bmi)
+```
+
+
+```{r}
+heal1$bmi30 <- ifelse(heal1$bmi >= 30, 1, 0)
+
+training_set_new <- heal1[train_samples, ]
+test_set_new <- heal1[-train_samples, ]
+
+final_model <- lm(charges~ sex + bmi + children + region + age2 + bmi30*smoker,data = training_set_new)
+
+summary(final_model)
+
+```
+
+
+```{r}
+medicalExpensesPredicted = predict(final_model, newdata = test_set_new)
+cor(medicalExpensesPredicted, test_set_new$charges)
+```
+
+```{r}
+plot(medicalExpensesPredicted, test_set_new$charges)
+abline(a = 0, b = 1, col = "red", lwd = 3, lty = 2)
+```
+
+
+```{r}
+R2 <- R2(medicalExpensesPredicted,test_set_new$charges)
+R2
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
